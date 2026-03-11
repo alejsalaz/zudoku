@@ -14,5 +14,8 @@
     "react": ">=19.0.0",
     "react-dom": ">=19.0.0",
     "zudoku": "0.71.0"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^2.21.0"
   }
 }
