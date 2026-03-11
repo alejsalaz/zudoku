@@ -1,11 +1,12 @@
 {
-  "name": "zudoku",
+  "name": "zudoku-docs-portal",
   "version": "0.1.0",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "zudoku dev",
-    "build": "zudoku build",
+    "bundle": "redocly bundle v1/openapi.yaml -o .bundled/v1.yaml --dereferenced && redocly bundle organizers/openapi.yaml -o .bundled/organizers.yaml --dereferenced",
+    "dev": "npm run bundle && zudoku dev",
+    "build": "npm run bundle && zudoku build",
     "preview": "zudoku preview",
     "lint": "eslint"
   },

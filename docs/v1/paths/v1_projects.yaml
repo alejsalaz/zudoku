@@ -1,0 +1,50 @@
+get:
+  summary: Listar proyectos
+  description: Obtiene una lista paginada de proyectos de documentación en Zudoku.
+  operationId: listProjects
+  tags:
+    - Proyectos
+  parameters:
+    - name: page
+      in: query
+      description: Número de página a consultar.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+    - name: per_page
+      in: query
+      description: Cantidad de registros por página.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+  responses:
+    "200":
+      description: Lista de proyectos.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Project"
+post:
+  summary: Crear proyecto
+  description: Crea un nuevo proyecto de documentación en Zudoku.
+  operationId: createProject
+  tags:
+    - Proyectos
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/ProjectInput"
+  responses:
+    "201":
+      description: Proyecto creado correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Project"

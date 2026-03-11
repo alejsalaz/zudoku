@@ -1,0 +1,48 @@
+get:
+  summary: Listar bundles de un proyecto
+  description: Obtiene todos los bundles OpenAPI generados para un proyecto concreto.
+  operationId: listProjectBundles
+  tags:
+    - Bundles
+  parameters:
+    - name: project_id
+      in: path
+      description: Identificador del proyecto.
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Lista de bundles para el proyecto indicado.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Bundle"
+post:
+  summary: Crear bundle para un proyecto
+  description: Genera un nuevo bundle OpenAPI a partir de la configuración del proyecto.
+  operationId: createProjectBundle
+  tags:
+    - Bundles
+  parameters:
+    - name: project_id
+      in: path
+      description: Identificador del proyecto.
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/BundleInput"
+  responses:
+    "201":
+      description: Bundle creado correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Bundle"

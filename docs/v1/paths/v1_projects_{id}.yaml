@@ -1,0 +1,48 @@
+get:
+  summary: Obtener proyecto
+  description: Obtiene el detalle de un proyecto de documentación por su identificador.
+  operationId: getProject
+  tags:
+    - Proyectos
+  parameters:
+    - name: id
+      in: path
+      description: Identificador del proyecto.
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Proyecto encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Project"
+    "404":
+      description: Proyecto no encontrado.
+patch:
+  summary: Actualizar proyecto
+  description: Actualiza parcialmente la información de un proyecto existente.
+  operationId: updateProject
+  tags:
+    - Proyectos
+  parameters:
+    - name: id
+      in: path
+      description: Identificador del proyecto.
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/ProjectInput"
+  responses:
+    "200":
+      description: Proyecto actualizado correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Project"

@@ -1,0 +1,64 @@
+openapi: 3.1.0
+info:
+  title: Zudoku API V1
+  version: 1.0.0
+  description: >
+    API principal de Zudoku para gestionar proyectos de documentación,
+    colecciones y bundles de especificaciones OpenAPI.
+servers:
+  - url: /v1
+    description: Entorno de ejemplo V1
+paths:
+  /v1/projects:
+    $ref: paths/v1_projects.yaml
+  /v1/projects/{id}:
+    $ref: paths/v1_projects_{id}.yaml
+  /v1/projects/{project_id}/bundles:
+    $ref: paths/v1_projects_{project_id}_bundles.yaml
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: >
+        Token de acceso de ejemplo para autenticar contra la API V1.
+  schemas:
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          example: proj_123
+        name:
+          type: string
+          example: Portal de APIs Zudoku
+        description:
+          type: string
+          example: Proyecto de ejemplo para documentar APIs con Zudoku.
+    ProjectInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+      required:
+        - name
+    Bundle:
+      type: object
+      properties:
+        id:
+          type: string
+          example: bndl_001
+        project_id:
+          type: string
+          example: proj_123
+        status:
+          type: string
+          example: completed
+    BundleInput:
+      type: object
+      properties:
+        target_version:
+          type: string
+          example: v1
