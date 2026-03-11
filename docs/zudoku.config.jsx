@@ -1,5 +1,6 @@
 /** @type {import('zudoku').ZudokuConfig} */
 const config = {
+  basePath: "/zudoku",
   site: {
     title: "Zudoku API",
     logo: {

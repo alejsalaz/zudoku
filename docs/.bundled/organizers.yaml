@@ -1,0 +1,108 @@
+openapi: 3.1.0
+info:
+  title: Zudoku Organizer API
+  version: 1.0.0
+  description: |
+    Endpoints administrativos para gestionar proyectos, bundles y accesos avanzados en Zudoku. Pensados para usuarios con permisos de organizer.
+servers:
+  - url: /organizers
+    description: Entorno de ejemplo Organizer
+paths:
+  /organizers/projects:
+    get:
+      summary: Listar proyectos como organizer
+      description: Lista todos los proyectos de documentación disponibles para usuarios con permisos de organizer.
+      operationId: organizersListProjects
+      tags:
+        - Organizer Proyectos
+      responses:
+        '200':
+          description: Lista de proyectos administrables.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: proj_123
+                    name:
+                      type: string
+                      example: Portal de APIs Zudoku
+                    status:
+                      type: string
+                      example: active
+  /organizers/projects/{project_id}/audits:
+    get:
+      summary: Ver auditorías de un proyecto
+      description: Devuelve el historial de auditorías y cambios relevantes realizados sobre un proyecto.
+      operationId: organizersListProjectAudits
+      tags:
+        - Organizer Auditorías
+      parameters:
+        - name: project_id
+          in: path
+          description: Identificador del proyecto a auditar.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de auditorías del proyecto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: audit_001
+                    action:
+                      type: string
+                      example: bundle_created
+                    performed_by:
+                      type: string
+                      example: organizer_01
+                    performed_at:
+                      type: string
+                      format: date-time
+  /organizers/user_accesses:
+    get:
+      summary: Listar accesos de usuario
+      description: Lista los usuarios que tienen acceso de organizer y sus permisos asociados.
+      operationId: organizersListUserAccesses
+      tags:
+        - Organizer Usuarios
+      responses:
+        '200':
+          description: Lista de usuarios con acceso de organizer.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: user_123
+                    email:
+                      type: string
+                      format: email
+                      example: organizer@example.com
+                    roles:
+                      type: array
+                      items:
+                        type: string
+                        example: organizer
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Token de acceso con permisos de organizer.

@@ -1,0 +1,217 @@
+openapi: 3.1.0
+info:
+  title: Zudoku API V1
+  version: 1.0.0
+  description: |
+    API principal de Zudoku para gestionar proyectos de documentación, colecciones y bundles de especificaciones OpenAPI.
+servers:
+  - url: /v1
+    description: Entorno de ejemplo V1
+paths:
+  /v1/projects:
+    get:
+      summary: Listar proyectos
+      description: Obtiene una lista paginada de proyectos de documentación en Zudoku.
+      operationId: listProjects
+      tags:
+        - Proyectos
+      parameters:
+        - name: page
+          in: query
+          description: Número de página a consultar.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: per_page
+          in: query
+          description: Cantidad de registros por página.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Lista de proyectos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties: &ref_0
+                    id:
+                      type: string
+                      example: proj_123
+                    name:
+                      type: string
+                      example: Portal de APIs Zudoku
+                    description:
+                      type: string
+                      example: Proyecto de ejemplo para documentar APIs con Zudoku.
+    post:
+      summary: Crear proyecto
+      description: Crea un nuevo proyecto de documentación en Zudoku.
+      operationId: createProject
+      tags:
+        - Proyectos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: &ref_1
+                name:
+                  type: string
+                description:
+                  type: string
+              required: &ref_2
+                - name
+      responses:
+        '201':
+          description: Proyecto creado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: *ref_0
+  /v1/projects/{id}:
+    get:
+      summary: Obtener proyecto
+      description: Obtiene el detalle de un proyecto de documentación por su identificador.
+      operationId: getProject
+      tags:
+        - Proyectos
+      parameters:
+        - name: id
+          in: path
+          description: Identificador del proyecto.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Proyecto encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: *ref_0
+        '404':
+          description: Proyecto no encontrado.
+    patch:
+      summary: Actualizar proyecto
+      description: Actualiza parcialmente la información de un proyecto existente.
+      operationId: updateProject
+      tags:
+        - Proyectos
+      parameters:
+        - name: id
+          in: path
+          description: Identificador del proyecto.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: *ref_1
+              required: *ref_2
+      responses:
+        '200':
+          description: Proyecto actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: *ref_0
+  /v1/projects/{project_id}/bundles:
+    get:
+      summary: Listar bundles de un proyecto
+      description: Obtiene todos los bundles OpenAPI generados para un proyecto concreto.
+      operationId: listProjectBundles
+      tags:
+        - Bundles
+      parameters:
+        - name: project_id
+          in: path
+          description: Identificador del proyecto.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de bundles para el proyecto indicado.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties: &ref_3
+                    id:
+                      type: string
+                      example: bndl_001
+                    project_id:
+                      type: string
+                      example: proj_123
+                    status:
+                      type: string
+                      example: completed
+    post:
+      summary: Crear bundle para un proyecto
+      description: Genera un nuevo bundle OpenAPI a partir de la configuración del proyecto.
+      operationId: createProjectBundle
+      tags:
+        - Bundles
+      parameters:
+        - name: project_id
+          in: path
+          description: Identificador del proyecto.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: &ref_4
+                target_version:
+                  type: string
+                  example: v1
+      responses:
+        '201':
+          description: Bundle creado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: *ref_3
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Token de acceso de ejemplo para autenticar contra la API V1.
+  schemas:
+    Project:
+      type: object
+      properties: *ref_0
+    ProjectInput:
+      type: object
+      properties: *ref_1
+      required: *ref_2
+    Bundle:
+      type: object
+      properties: *ref_3
+    BundleInput:
+      type: object
+      properties: *ref_4
