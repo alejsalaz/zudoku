@@ -36,6 +36,9 @@ jobs:
         working-directory: docs
         run: npm run build
 
+      - name: Create 404.html for SPA routing
+        run: cp docs/dist/zudoku/index.html docs/dist/404.html
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
