@@ -71,11 +71,6 @@ const config = {
     },
     {
       type: "link",
-      to: "/rickandmorty",
-      label: "Rick and Morty API",
-    },
-    {
-      type: "link",
       to: "/aleluya",
       label: "Aleluya API",
     },
@@ -96,14 +91,6 @@ const config = {
       type: "file",
       input: "./.bundled/organizers.yaml",
       path: "/organizers",
-      options: {
-        showInfoPage: false,
-      },
-    },
-    {
-      type: "file",
-      input: "./.bundled/rickandmorty.yaml",
-      path: "/rickandmorty",
       options: {
         showInfoPage: false,
       },

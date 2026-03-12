@@ -33,39 +33,28 @@ jobs:
         working-directory: docs
         run: npm ci
 
-      - name: Download and convert Rick and Morty API
+      - name: Download Aleluya API
         working-directory: docs
         run: |
           # Crear directorio .bundled si no existe
           mkdir -p .bundled
-          # Descargar JSON desde URL externa
-          curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/json" \
-               -L -o /tmp/rickandmorty.json https://rickandmorty.zuplo.io/openapi.json
+          # Descargar YAML desde URL externa
+          curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/x-yaml, text/yaml" \
+               -L -o /tmp/aleluya.yaml https://api.aleluya.com/docs
           # Verificar que el archivo se descargó correctamente
-          if [ ! -s /tmp/rickandmorty.json ]; then
-            echo "Error: Failed to download rickandmorty.json"
+          if [ ! -s /tmp/aleluya.yaml ]; then
+            echo "Error: Failed to download aleluya.yaml"
             exit 1
           fi
           # Verificar que tiene la propiedad 'openapi' o 'swagger'
-          if ! grep -q '"openapi"' /tmp/rickandmorty.json && ! grep -q '"swagger"' /tmp/rickandmorty.json; then
+          if ! grep -q "^openapi:" /tmp/aleluya.yaml && ! grep -q "^swagger:" /tmp/aleluya.yaml; then
             echo "Error: Downloaded file does not appear to be a valid OpenAPI spec"
-            cat /tmp/rickandmorty.json | head -20
+            cat /tmp/aleluya.yaml | head -20
             exit 1
           fi
-          # Convertir JSON a YAML usando Node.js y js-yaml (instalado con npm ci)
-          node -e "
-            const fs = require('fs');
-            const yaml = require('js-yaml');
-            try {
-              const json = JSON.parse(fs.readFileSync('/tmp/rickandmorty.json', 'utf8'));
-              const yamlContent = yaml.dump(json, { lineWidth: -1, noRefs: true });
-              fs.writeFileSync('.bundled/rickandmorty.yaml', yamlContent);
-              console.log('✓ Rick and Morty API convertida a YAML');
-            } catch (error) {
-              console.error('Error converting JSON to YAML:', error.message);
-              process.exit(1);
-            }
-          "
+          # Copiar YAML directamente (ya está en formato YAML)
+          cp /tmp/aleluya.yaml .bundled/aleluya.yaml
+          echo "✓ Aleluya API descargada (YAML)"
 
       - name: Build
         working-directory: docs
