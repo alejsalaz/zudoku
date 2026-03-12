@@ -30,14 +30,10 @@ jobs:
 
       - name: Sync OpenAPI bundles
         run: |
-          # Descargar desde URL externa (rickandmorty API)
+          # Descargar desde URL externa (rickandmorty API) en archivo separado
           curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/json" \
-               -L -o docs/.bundled/v1.yaml https://rickandmorty.zuplo.io/openapi.json || true
-          # Fallback: descargar desde nominapp-api si la URL principal falla
-          if [ ! -s docs/.bundled/v1.yaml ]; then
-            curl -L -o docs/.bundled/v1.yaml https://nominapp-api.herokuapp.com/openapi.yaml || true
-          fi
-          curl -L -o docs/.bundled/organizers.yaml https://nominapp-api.herokuapp.com/organizers.yaml || true
+               -L -o docs/.bundled/rickandmorty.yaml https://rickandmorty.zuplo.io/openapi.json
+          # v1.yaml y organizers.yaml se generan desde archivos locales en npm run bundle
 
       - name: Install dependencies
         working-directory: docs
