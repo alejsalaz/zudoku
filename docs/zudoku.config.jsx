@@ -75,8 +75,8 @@ const config = {
   },
   apis: [
     {
-      type: "file",
-      input: "./.bundled/v1.yaml",
+      type: "url",
+      iinput: "https://rickandmorty.zuplo.io/openapi.json",
       path: "/v1",
       options: {
         showInfoPage: false,
