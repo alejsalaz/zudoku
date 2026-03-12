@@ -33,68 +33,57 @@ jobs:
         working-directory: docs
         run: npm ci
 
-      - name: Download external APIs
+      - name: Download and convert Rick and Morty API
         working-directory: docs
         run: |
           # Crear directorio .bundled si no existe
           mkdir -p .bundled
-          
-          # Descargar Rick and Morty API (JSON)
-          echo "Descargando Rick and Morty API..."
-          HTTP_CODE=$(curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/json" \
-               -L -w "%{http_code}" -o /tmp/rickandmorty.json https://rickandmorty.zuplo.io/openapi.json)
-          
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "Error: HTTP $HTTP_CODE al descargar rickandmorty.json"
-            cat /tmp/rickandmorty.json
-            exit 1
-          fi
-          
+          # Descargar JSON desde URL externa
+          curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/json" \
+               -L -o /tmp/rickandmorty.json https://rickandmorty.zuplo.io/openapi.json
+          # Verificar que el archivo se descargó correctamente
           if [ ! -s /tmp/rickandmorty.json ]; then
-            echo "Error: El archivo descargado está vacío"
+            echo "Error: Failed to download rickandmorty.json"
             exit 1
           fi
-          
+          # Verificar que tiene la propiedad 'openapi' o 'swagger'
           if ! grep -q '"openapi"' /tmp/rickandmorty.json && ! grep -q '"swagger"' /tmp/rickandmorty.json; then
-            echo "Error: Rick and Morty file does not appear to be a valid OpenAPI spec"
-            echo "Contenido completo del archivo:"
-            cat /tmp/rickandmorty.json
+            echo "Error: Downloaded file does not appear to be a valid OpenAPI spec"
+            cat /tmp/rickandmorty.json | head -20
             exit 1
           fi
-          
+          # Convertir JSON a YAML usando Node.js y js-yaml (instalado con npm ci)
           node -e "
             const fs = require('fs');
             const yaml = require('js-yaml');
-            const json = JSON.parse(fs.readFileSync('/tmp/rickandmorty.json', 'utf8'));
-            fs.writeFileSync('.bundled/rickandmorty.yaml', yaml.dump(json, { lineWidth: -1, noRefs: true }));
-            console.log('✓ Rick and Morty API convertida a YAML');
+            try {
+              const json = JSON.parse(fs.readFileSync('/tmp/rickandmorty.json', 'utf8'));
+              const yamlContent = yaml.dump(json, { lineWidth: -1, noRefs: true });
+              fs.writeFileSync('.bundled/rickandmorty.yaml', yamlContent);
+              console.log('✓ Rick and Morty API convertida a YAML');
+            } catch (error) {
+              console.error('Error converting JSON to YAML:', error.message);
+              process.exit(1);
+            }
           "
-          
-          # Descargar Aleluya API (YAML)
-          echo "Descargando Aleluya API..."
-          HTTP_CODE=$(curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/x-yaml, text/yaml" \
-               -L -w "%{http_code}" -o /tmp/aleluya.yaml https://api.aleluya.com/docs || echo "000")
-          
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "Error: HTTP $HTTP_CODE al descargar aleluya.yaml"
-            cat /tmp/aleluya.yaml
-            exit 1
-          fi
-          
+
+      - name: Download Aleluya API
+        working-directory: docs
+        run: |
+          # Descargar YAML desde URL externa
+          curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/x-yaml, text/yaml" \
+               -L -o /tmp/aleluya.yaml https://api.aleluya.com/docs
           # Verificar que el archivo se descargó correctamente
           if [ ! -s /tmp/aleluya.yaml ]; then
             echo "Error: Failed to download aleluya.yaml"
             exit 1
           fi
-          
-          # Verificar que tiene la estructura OpenAPI
+          # Verificar que tiene la propiedad 'openapi' o 'swagger'
           if ! grep -q "^openapi:" /tmp/aleluya.yaml && ! grep -q "^swagger:" /tmp/aleluya.yaml; then
             echo "Error: Downloaded file does not appear to be a valid OpenAPI spec"
-            echo "Primeros 500 caracteres del archivo:"
-            head -c 500 /tmp/aleluya.yaml
+            cat /tmp/aleluya.yaml | head -20
             exit 1
           fi
-          
           # Copiar YAML directamente (ya está en formato YAML)
           cp /tmp/aleluya.yaml .bundled/aleluya.yaml
           echo "✓ Aleluya API descargada (YAML)"
