@@ -28,16 +28,44 @@ jobs:
           cache: npm
           cache-dependency-path: docs/package-lock.json
 
-      - name: Sync OpenAPI bundles
-        run: |
-          # Descargar desde URL externa (rickandmorty API) en archivo separado
-          curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/json" \
-               -L -o docs/.bundled/rickandmorty.yaml https://rickandmorty.zuplo.io/openapi.json
-          # v1.yaml y organizers.yaml se generan desde archivos locales en npm run bundle
 
       - name: Install dependencies
         working-directory: docs
         run: npm ci
+
+      - name: Download and convert Rick and Morty API
+        working-directory: docs
+        run: |
+          # Crear directorio .bundled si no existe
+          mkdir -p .bundled
+          # Descargar JSON desde URL externa
+          curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/json" \
+               -L -o /tmp/rickandmorty.json https://rickandmorty.zuplo.io/openapi.json
+          # Verificar que el archivo se descargó correctamente
+          if [ ! -s /tmp/rickandmorty.json ]; then
+            echo "Error: Failed to download rickandmorty.json"
+            exit 1
+          fi
+          # Verificar que tiene la propiedad 'openapi' o 'swagger'
+          if ! grep -q '"openapi"' /tmp/rickandmorty.json && ! grep -q '"swagger"' /tmp/rickandmorty.json; then
+            echo "Error: Downloaded file does not appear to be a valid OpenAPI spec"
+            cat /tmp/rickandmorty.json | head -20
+            exit 1
+          fi
+          # Convertir JSON a YAML usando Node.js y js-yaml (instalado con npm ci)
+          node -e "
+            const fs = require('fs');
+            const yaml = require('js-yaml');
+            try {
+              const json = JSON.parse(fs.readFileSync('/tmp/rickandmorty.json', 'utf8'));
+              const yamlContent = yaml.dump(json, { lineWidth: -1, noRefs: true });
+              fs.writeFileSync('.bundled/rickandmorty.yaml', yamlContent);
+              console.log('✓ Rick and Morty API convertida a YAML');
+            } catch (error) {
+              console.error('Error converting JSON to YAML:', error.message);
+              process.exit(1);
+            }
+          "
 
       - name: Build
         working-directory: docs

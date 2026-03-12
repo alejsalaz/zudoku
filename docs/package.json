@@ -16,6 +16,7 @@
     "zudoku": "0.71.0"
   },
   "devDependencies": {
-    "@redocly/cli": "^2.21.0"
+    "@redocly/cli": "^2.21.0",
+    "js-yaml": "^4.1.0"
   }
 }
