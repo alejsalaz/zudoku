@@ -41,14 +41,29 @@ jobs:
           
           # Descargar Rick and Morty API (JSON)
           echo "Descargando Rick and Morty API..."
-          curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/json" \
-               -L -o /tmp/rickandmorty.json https://rickandmorty.zuplo.io/openapi.json
-          if [ ! -s /tmp/rickandmorty.json ]; then
-            echo "Error: Failed to download rickandmorty.json"
+          HTTP_CODE=$(curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/json" \
+               -L -w "%{http_code}" -o /tmp/rickandmorty.json https://rickandmorty.zuplo.io/openapi.json)
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Error: HTTP $HTTP_CODE al descargar rickandmorty.json"
+            cat /tmp/rickandmorty.json
             exit 1
           fi
+          
+          if [ ! -s /tmp/rickandmorty.json ]; then
+            echo "Error: El archivo descargado está vacío"
+            exit 1
+          fi
+          
+          # Mostrar primeros bytes para debugging
+          echo "Primeros 500 caracteres del archivo descargado:"
+          head -c 500 /tmp/rickandmorty.json
+          echo ""
+          
           if ! grep -q '"openapi"' /tmp/rickandmorty.json && ! grep -q '"swagger"' /tmp/rickandmorty.json; then
             echo "Error: Rick and Morty file does not appear to be a valid OpenAPI spec"
+            echo "Contenido completo del archivo:"
+            cat /tmp/rickandmorty.json
             exit 1
           fi
           node -e "
