@@ -33,7 +33,7 @@ jobs:
         working-directory: docs
         run: npm ci
 
-      - name: Download and convert external APIs
+      - name: Download external APIs
         working-directory: docs
         run: |
           # Crear directorio .bundled si no existe
@@ -55,17 +55,13 @@ jobs:
             exit 1
           fi
           
-          # Mostrar primeros bytes para debugging
-          echo "Primeros 500 caracteres del archivo descargado:"
-          head -c 500 /tmp/rickandmorty.json
-          echo ""
-          
           if ! grep -q '"openapi"' /tmp/rickandmorty.json && ! grep -q '"swagger"' /tmp/rickandmorty.json; then
             echo "Error: Rick and Morty file does not appear to be a valid OpenAPI spec"
             echo "Contenido completo del archivo:"
             cat /tmp/rickandmorty.json
             exit 1
           fi
+          
           node -e "
             const fs = require('fs');
             const yaml = require('js-yaml');
@@ -76,19 +72,29 @@ jobs:
           
           # Descargar Aleluya API (YAML)
           echo "Descargando Aleluya API..."
-          curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/x-yaml, text/yaml" \
-               -L -o /tmp/aleluya.yaml https://api.aleluya.com/docs
+          HTTP_CODE=$(curl -H "User-Agent: Mozilla/5.0" -H "Accept: application/x-yaml, text/yaml" \
+               -L -w "%{http_code}" -o /tmp/aleluya.yaml https://api.aleluya.com/docs || echo "000")
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Error: HTTP $HTTP_CODE al descargar aleluya.yaml"
+            cat /tmp/aleluya.yaml
+            exit 1
+          fi
+          
           # Verificar que el archivo se descargó correctamente
           if [ ! -s /tmp/aleluya.yaml ]; then
             echo "Error: Failed to download aleluya.yaml"
             exit 1
           fi
+          
           # Verificar que tiene la estructura OpenAPI
           if ! grep -q "^openapi:" /tmp/aleluya.yaml && ! grep -q "^swagger:" /tmp/aleluya.yaml; then
             echo "Error: Downloaded file does not appear to be a valid OpenAPI spec"
-            cat /tmp/aleluya.yaml | head -20
+            echo "Primeros 500 caracteres del archivo:"
+            head -c 500 /tmp/aleluya.yaml
             exit 1
           fi
+          
           # Copiar YAML directamente (ya está en formato YAML)
           cp /tmp/aleluya.yaml .bundled/aleluya.yaml
           echo "✓ Aleluya API descargada (YAML)"
